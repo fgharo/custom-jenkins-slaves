@@ -1,0 +1,75 @@
+# This Openshift Template houses the OCP resources to produce a custom jenkins slave/agent.
+# Parameters are housed in maven/build.params.
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  labels:
+    app: app
+    template: custom-jenkins-slave-mvn-with-volume
+  name: custom-jenkins-slave-mvn-with-volume
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+        app: ${APPLICATION}
+    name: ${APPLICATION}
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+    labels:
+      app: ${APPLICATION}-build
+    name: ${APPLICATION}-build
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION}:latest
+    runPolicy: Serial
+    source:
+        git:
+            uri: ${SOURCE_REPOSITORY_URL}
+            ref: ${SOURCE_REPOSITORY_REF}
+        type: Git
+        contextDir: ${CONTEXT_DIR}
+    strategy:
+        type: Docker
+        forcePull: true
+        dockerStrategy:
+            from:
+                kind: "DockerImage"
+                name: ${SOURCE_IMAGE}
+    triggers: []
+parameters:
+- name: SOURCE_IMAGE
+  displayName: Base Image for application.
+  description: Base Image
+  required: true
+- name: APPLICATION
+  displayName: Aplication to build.
+  description: Application name
+  required: true
+- name: APPLICATION_TAG
+  displayName: Application Tag.
+  description: Application Tag.
+  value: latest_dev
+- name: SOURCE_NAMESPACE
+  displayName: Namespace for source image stream.
+  description: Namespace
+  required: true
+  value: openshift
+- name: CONTEXT_DIR
+  displayName: Context directory where source code and build strategy is for this image to build.
+  description: Context directory where source code and build strategy is for this image to build.
+  required: true
+  value: ""
+- name: SOURCE_REPOSITORY_URL
+  displayName: Git source URI for application.
+  description: Git repository url.
+  required: true
+- name: SOURCE_REPOSITORY_REF
+  displayName: Branch containing the source code.
+  description: Branch containing the source code.
+labels:
+  template: custom-jenkins-slave-mvn-with-volume

@@ -1,0 +1,41 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: customer-jenkins-slave-mvn-with-volume
+  labels:
+    role: jenkins-slave
+data:
+  jenkinsmvnslave: |-
+    <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+      <inheritFrom></inheritFrom>
+      <name>customer-jenkins-slave-mvn-with-volume</name>
+      <instanceCap>2147483647</instanceCap>
+      <idleMinutes>0</idleMinutes>
+      <label>${FULL_AGENT_NAME_EXTENDED}</label>
+      <serviceAccount>jenkins</serviceAccount>
+      <nodeSelector></nodeSelector>
+      <nodeUsageMode>EXCLUSIVE</nodeUsageMode>
+      <volumes/>
+      <containers>
+        <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+          <name>jnlp</name>
+          <image>image-registry.openshift-image-registry.svc:5000/openshift/customer-jenkins-slave-mvn-with-volume</image>
+          <privileged>false</privileged>
+          <alwaysPullImage>true</alwaysPullImage>
+          <workingDir>/tmp</workingDir>
+          <command></command>
+          <args>\${computer.jnlpmac} \${computer.name}</args>
+          <ttyEnabled>false</ttyEnabled>
+          <resourceRequestCpu>1</resourceRequestCpu>
+          <resourceRequestMemory>1Gi</resourceRequestMemory>
+          <resourceLimitCpu>1</resourceLimitCpu>
+          <resourceLimitMemory>1.5Gi</resourceLimitMemory>
+          <envVars/>
+        </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
+      </containers>
+      <envVars/>
+      <annotations/>
+      <imagePullSecrets/>
+      <nodeProperties/>
+    </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
+
