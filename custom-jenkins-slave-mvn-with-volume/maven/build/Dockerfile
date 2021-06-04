@@ -1,17 +1,21 @@
 # If used with a Openshift BuildConfig of strategy Docker From gets replaced from one specificed in buildconfig.
-FROM docker-registry-default.registry.ocp.example.com/openshift3/jenkins:v3.7
+FROM registry.redhat.io/openshift4/ose-jenkins-agent-maven:v4.7
 
 MAINTAINER Frank Haro <fharo@redhat.com>
 
-ENV MAVEN_VERSION=3.5
+ENV MAVEN_VERSION=3.6.2
+ARG INSTALL_PKGS="skopeo"
+USER root
 
 # Install Skopeo
-RUN yum repolist > /dev/null && \
-    yum clean all && \
-    INSTALL_PKGS="skopeo" && \
-    yum install -y --enablerepo=rhel-7-server-extras-rpms --setopt=tsflags=nodocs $INSTALL_PKGS && \
-    rpm -V $INSTALL_PKGS && \
-    yum clean all
+RUN yum repolist > /dev/null 
+RUN yum clean all
+# --enablerepo=rhel-7-server-extras-rpms 
+# Error: Unknown repo: 'rhel-7-server-extras-rpms'
+RUN yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS
+RUN rpm -V $INSTALL_PKGS
+RUN yum clean all
+RUN skopeo -v
 
 RUN chown -R 1001:0 $HOME && \
     chmod -R g+rw $HOME
