@@ -1,4 +1,5 @@
-FROM registry.redhat.io/openshift3/jenkins-agent-maven-35-rhel7:v3.11
+# If used with a Openshift BuildConfig of strategy Docker From gets replaced from one specificed in buildconfig.
+FROM docker-registry-default.registry.ocp.example.com/openshift3/jenkins:v3.7
 
 MAINTAINER Frank Haro <fharo@redhat.com>
 
