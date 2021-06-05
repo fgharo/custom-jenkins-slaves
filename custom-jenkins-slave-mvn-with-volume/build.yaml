@@ -41,6 +41,16 @@ objects:
                 kind: "DockerImage"
                 name: ${SOURCE_IMAGE}
     triggers: []
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: maven-local-cache
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
 parameters:
 - name: SOURCE_IMAGE
   displayName: Base Image for application.

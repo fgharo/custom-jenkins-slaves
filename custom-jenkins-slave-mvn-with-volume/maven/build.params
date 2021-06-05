@@ -1,4 +1,4 @@
-SOURCE_IMAGE=registry.redhat.io/openshift3/jenkins-agent-maven-35-rhel7:v3.10
+SOURCE_IMAGE=registry.redhat.io/openshift4/ose-jenkins-agent-maven:v4.7
 APPLICATION=custom-jenkins-slave-mvn-with-volume
 SOURCE_REPOSITORY_URL=https://github.com/fgharo/custom-jenkins-slaves.git
 SOURCE_REPOSITORY_REF=master
