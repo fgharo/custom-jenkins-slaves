@@ -1,0 +1,48 @@
+Prereqs:
+A. Have a Openshift namespace for cicd work. For example, jenkins-cicd
+B. Have a Openshift Jenkins master pod up and running in jenkins-cicd. 
+I used the given default jenkins template: jenkins-persistent, which comes with all the other openshift 
+resources such as service account (which allows us to further connect this user to do edit work in other
+openshift namespaces such as deploy resources for an application during pipeline).
+
+Steps:
+1. Build the custom resources to build the custom jenkins agent.
+$ oc process -f build.yaml --param-file=maven/build.params | oc apply -f - -n jenkins-cicd
+
+2. This will produce a buildconfig along with an imagestream in the jenkins-cicd namespace with name custom-jenkins-slave-mvn-with-volume .
+$ oc get is
+NAME                                   IMAGE REPOSITORY                                                                                                      TAGS     UPDATED
+custom-jenkins-slave-mvn-with-volume   default-route-openshift-image-registry.apps.na45.prod.nextcle.com/jenkins-cicd/custom-jenkins-slave-mvn-with-volume   latest   About an hour ago
+
+3. Start the actual build.
+$ oc start-build custom-jenkins-slave-mvn-with-volume
+
+4. This will produce an actual conatiner image in the jenkins-cicd namespace under custom-jenkins-slave-mvn-with-volume imagestream
+Note the Docker image url image-registry.openshift-image-registry.svc:5000/jenkins-cicd/custom-jenkins-slave-mvn-with-volume 
+
+$ oc describe istag custom-jenkins-slave-mvn-with-volume:latest 
+Image Name:     sha256:904c061699c21af61d0294672529db8d1be82dd30837929272ee2e7b5a7c9c2d
+Docker Image:   image-registry.openshift-image-registry.svc:5000/jenkins-cicd/custom-jenkins-slave-mvn-with-volume@sha256:904c061699c21af61d0294672529db8d1be82dd30837929272ee2e7b5a7c9c2d
+
+
+5. Use the built Openshift jenkins agent by putting the Docker image url from earlier step into the PodTemplate
+in cached-slave-configmap.yaml. Jenkins will then scan its namespace for configmaps with key:value of metadata.labels.role: jenkins-slave
+$ oc apply -f custom-jenkins-slave-mvn-with-volume/cached-slave-configmap.yaml  -n jenkins-cicd
+
+6. Now the PodTemplate configuration should be available in the Jenkins master. Make sure the declarative pipeline has the following 
+code:
+pipeline {
+    options {
+        // set a timeout of 60 minutes for this pipeline
+        timeout(time: 60, unit: 'MINUTES')
+    }
+    agent {
+      node {
+        //TODO: Add label for the Maven jenkins agent
+        label 'custom-jenkins-slave-mvn-with-volume'
+      }
+    }
+... 
+
+
+What is difference between oc process and oc apply?
