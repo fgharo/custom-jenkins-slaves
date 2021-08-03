@@ -1,4 +1,4 @@
-SOURCE_IMAGE=registry.redhat.io/openshift4/ose-jenkins-agent-maven:v4.7
+SOURCE_IMAGE=registry.redhat.io/openshift4/ose-jenkins-agent-nodejs-12-rhel8
 APPLICATION=custom-jenkins-slave-nodejs-with-skopeo
 SOURCE_REPOSITORY_URL=https://github.com/fgharo/custom-jenkins-slaves.git
 SOURCE_REPOSITORY_REF=master
